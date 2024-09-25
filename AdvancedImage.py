@@ -5,16 +5,16 @@ import numpy as np
 def decrease_brightness(image, value):
     # Parlaklığı azaltmak için görüntüyü koyulaştır
     # 0 ile 255 arasında bir değer olmalıdır
-    value = max(0, min(255, value))  # Değerin 0-255 arasında olmasını sağla
+    value = max(0, min(255, value))
 
-    # Parlaklığı azalt
+    # Parlaklığı azaltma
     darkened_image = cv2.subtract(image, (value, value, value, 0))  # BGR formatında çıkarma işlemi
 
     return darkened_image
 
 
 def sharpen_image(image):
-    # Keskinleştirme için kernel tanımla
+    # Keskinleştirme için kernel tanımlama
     kernel = np.array([[0, -1, 0],
                        [-1, 5, -1],
                        [0, -1, 0]])
@@ -82,11 +82,11 @@ def resize_image(image, scale_percent):
     resized_image = cv2.resize(image, new_size, interpolation=cv2.INTER_LINEAR)
 
     """
-    cv2.resize(): OpenCV kütüphanesinin bir fonksiyonudur. Bu fonksiyon,
-    resmi belirtilen yeni boyutlara (new_size) göre yeniden boyutlandırır.
+    cv2.resize(): OpenCV kütüphanesinin bir fonksiyonudur Bu fonksiyon,
+    resmi belirtilen yeni boyutlara new_size göre yeniden boyutlandırır.
     
-    interpolation=cv2.INTER_LINEAR: Yeniden boyutlandırma işlemi sırasında kullanılan interpolasyon yöntemidir.
-    Bu yöntem, piksellerin daha pürüzsüz görünmesini sağlar.
+    interpolation=cv2.INTER_LINEAR: Yeniden boyutlandırma işlemi sırasında kullanılan interpolasyon yöntemidir
+    Bu yöntem piksellerin daha pürüzsüz görünmesini sağlar.
     """
 
     return resized_image

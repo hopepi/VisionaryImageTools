@@ -1,5 +1,6 @@
 """
 MASAÜSTÜNDEKİ DOSYALARA KAYDETMEZ
+PROJE TEST YAPIM AŞAMASINDADIR
 """
 
 import cv2
@@ -23,19 +24,17 @@ def process_image(image, remove_black=False, add_sharpened=False, save_path=''):
 
     # Eğer save_path boşsa mevcut dizini kullan
     if save_path== "":
-        save_path = '.'  # Mevcut dizin
+        save_path = '.'  #Mevcut dizin
 
-    # Kaydetme dizinini oluştur (varsa yoksa)
+    # Kaydetme dizinini oluştur varsa yoksa
     os.makedirs(save_path, exist_ok=True)
     print(f"Directory created or already exists: {save_path}")
 
     # Belirli açı aralıklarında döndürme ve opsiyonel olarak arka planı kaldırma işlemi
     for angle in range(0, 360, 30):
         rotated_image = rotate_image(image, angle)
-        # Arka planı kaldırma işlemi
         result_image = remove_black_background(rotated_image) if remove_black else rotated_image
 
-        # Sonuç görüntüsünü kaydet
         output_file_path = os.path.join(save_path, f'rotated_image_{angle}.png')
         success = cv2.imwrite(output_file_path, result_image)
 
@@ -44,13 +43,14 @@ def process_image(image, remove_black=False, add_sharpened=False, save_path=''):
         else:
             print(f"Error saving image: {output_file_path}")
 
-# Tkinter pencere oluştur
-Tk().withdraw()  # Ana pencereyi gizle
+
+Tk().withdraw()
 save_path = askdirectory(title="Kayıt Yeri Seçin")  # Kullanıcıdan kayıt yeri seçmesini iste
 
-# Resmi yükle
+#test
 image = cv2.imread("resim4.jpeg")
+
 if image is None:
-    print("Error: Could not read the image. Please check the file path.")
+    print("Image not found")
 else:
     process_image(image, remove_black=True, add_sharpened=True, save_path=save_path)
