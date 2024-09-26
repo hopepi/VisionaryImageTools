@@ -2,12 +2,10 @@ import tkinter as tk
 from tkinter import filedialog
 import os
 
-from matplotlib.pyplot import title
-
 
 class DirectorySelect:
     def __init__(self):
-        self = self
+        pass
 
     def select_directory(self):
         root = tk.Tk()
@@ -79,11 +77,11 @@ class DirectorySelect:
         if file_path:
             return file_path
         else:
-            print("seçilmedi")
+            print("Herhangi bir değer seçilmedi")
 
-
-# Fonksiyonu çağır
+"""
 test = DirectorySelect()
-"""print(test.select_directory())"""
-"""print(test.select_image_list())"""
+print(test.select_directory())
+print(test.select_image_list())
 print(test.select_image())
+"""

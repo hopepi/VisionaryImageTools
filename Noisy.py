@@ -18,7 +18,7 @@ class ImageNoiseAugmentor:
 
         return noisy_image
 
-    def add_salt_and_pepper_noise(self, salt_prob=0.05, pepper_prob=0.05):
+    def add_salt_and_pepper_noise(self, salt_prob=0.02, pepper_prob=0.02):
         noisy_image = np.copy(self.image)
 
         # Toplam piksel sayısını hesapla
