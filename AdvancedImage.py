@@ -1,3 +1,4 @@
+import random
 import cv2
 import numpy as np
 
@@ -24,9 +25,6 @@ def sharpen_image(image):
     return smoothed
 
 
-
-
-
 """
 def sharpen_image_with_blur(image):
     # Gaussian bulanıklaştırma
@@ -47,6 +45,8 @@ def unsharp_mask(image, sigma=1.0, alpha=1.5):
 
     return sharpened
 """
+
+
 
 def remove_black_background(image):
     # Görüntüyü bgr den rgba ya dönüştür
@@ -90,3 +90,57 @@ def resize_image(image, scale_percent):
     """
 
     return resized_image
+
+
+def add_brightness_contrast_random(image):
+    # Rastgele beta ve alpha değerlerini belirle
+    beta = random.randint(-30, 30)  # Parlaklık için -30 ile +30 arasında bir değer
+    alpha = round(random.uniform(0.8, 1.2), 2)  # Kontrast için 0.8 ile 1.2 arasında bir değer
+
+    # İlk olarak parlaklık ayarını yap
+    image_bright = cv2.convertScaleAbs(image, alpha=1, beta=beta)
+    # Ardından kontrast ayarını yap
+    adjusted_image = cv2.convertScaleAbs(image_bright, alpha=alpha, beta=0)
+
+    return adjusted_image
+
+
+def add_contrast(image):
+    # Rastgele alpha değerini belirle (0.8 ile 1.5 arasında)
+    alpha = round(random.uniform(0.8, 1.5), 2)  # 0.8 ile 1.5 arasında bir değer
+
+    # Kontrast ayarını uygula
+    adjusted_image = cv2.convertScaleAbs(image, alpha=alpha, beta=0)
+
+    return adjusted_image
+
+
+
+def color_distortion(image):
+    # Renk kanallarını ayır
+    b, g, r = cv2.split(image)
+
+    # Her kanal için rastgele bir çarpan belirle
+    b_factor = random.uniform(0.7, 1.2)  # Mavi kanal için çarpan
+    g_factor = random.uniform(0.7, 1.2)  # Yeşil kanal için çarpan
+    r_factor = random.uniform(0.7, 1.2)  # Kırmızı kanal için çarpan
+
+    # Her kanalı çarpan ile çarp
+    b = cv2.convertScaleAbs(b, alpha=b_factor, beta=0)
+    g = cv2.convertScaleAbs(g, alpha=g_factor, beta=0)
+    r = cv2.convertScaleAbs(r, alpha=r_factor, beta=0)
+
+    # Kanalları birleştir
+    distorted_image = cv2.merge((b, g, r))
+
+    return distorted_image
+
+
+# ksize: Bulanıklık penceresinin boyutu
+def apply_blur(image, ksize=5):
+    # Görüntüyü bulanıklaştır
+    blurred_image = cv2.GaussianBlur(image, (ksize, ksize), 0)
+
+    return blurred_image
+
+
