@@ -5,11 +5,6 @@ PROJE TEST YAPIM AŞAMASINDADIR
 import cv2
 import numpy as np
 import os
-from tkinter import Tk
-from tkinter.filedialog import askdirectory
-
-from PIL.SpiderImagePlugin import iforms
-
 from AdvancedImage import AdvancedImage
 
 
@@ -82,7 +77,7 @@ class Rotation:
         width_pixel = width * image_width
         height_pixel = height * image_height
 
-        # Bounding box köşelerini belirle (piksel cinsinden)
+        # Bounding box köşelerini belirle piksel cinsinden
         corners = np.array([
             [x_pixel - width_pixel / 2, y_pixel - height_pixel / 2],
             [x_pixel + width_pixel / 2, y_pixel - height_pixel / 2],
@@ -96,7 +91,7 @@ class Rotation:
 
         rotated_corners = transform_matrix.dot(corners_ones.T).T
 
-        # Yeni bounding box'ı oluştur (piksel cinsinden)
+        # Yeni bounding boxı oluştur piksel cinsinden
         x_new_pixel = (rotated_corners[:, 0].min() + rotated_corners[:, 0].max()) / 2
         y_new_pixel = (rotated_corners[:, 1].min() + rotated_corners[:, 1].max()) / 2
         width_new_pixel = rotated_corners[:, 0].max() - rotated_corners[:, 0].min()
@@ -146,54 +141,3 @@ class Rotation:
                 # Dosyaya yazıyoruz
                 file.write(f"{class_id} {x_center} {y_center} {width} {height}\n")
 
-
-
-"""
-#Test
-test_image_path = 'resim1.png'  # Test için kullanılan görüntü dosyasının yolu
-
-rotation = Rotation(test_image_path,"resim4.txt")
-
-try:
-    # Test için görüntüyü döndür ve kaydet
-    rotation.process_image(remove_black=True, add_sharpened=True,rotate_label=True)
-except Exception as e:
-    print(f"Test sırasında bir hata oluştu: {e}")
-
-
-"""
-
-
-
-"""
-input_file_path = 'resim4.txt'  # Okuyacağınız dosya
-base_output_file_name = os.path.splitext(input_file_path)[0]  # Dosya adını ve uzantıyı ayırıyoruz
-
-
-try:
-    # Label değerlerini dosyadan okuyalım
-    labels = rotation.read_labels_from_file(input_file_path)  # Doğru çağrı
-    print(f"Original Labels: {labels}")
-
-    # Her bir açı için döndürülmüş label değerlerini yazalım
-    for angle in range(0, 360, 45):
-        # Dönüşüm işlemini gerçekleştiriyoruz
-        rotated_labels = [rotation.rotate_labels([label], angle) for label in labels]
-
-        # Dönüşümden sonra listeyi düzleştirelim
-        flattened_labels = [item for sublist in rotated_labels for item in sublist]
-
-        print(f"Angle: {angle} degrees, Rotated Labels: {flattened_labels}")
-
-        # Yeni dosya adını oluştur
-        output_file_path = f"{base_output_file_name}_{angle}.txt"
-
-        # Yeni dosyaya yazma
-        rotation.write_labels_to_file(output_file_path, flattened_labels)
-        print(f"Rotated labels written to {output_file_path} for angle {angle}")
-
-except FileNotFoundError as e:
-    print(f"Hata: {e}")
-except Exception as e:
-    print(f"Beklenmeyen bir hata oluştu: {e}")
-"""
