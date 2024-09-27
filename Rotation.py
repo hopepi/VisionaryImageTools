@@ -2,29 +2,33 @@
 MASAÜSTÜNDEKİ DOSYALARA KAYDETMEZ
 PROJE TEST YAPIM AŞAMASINDADIR
 """
-
 import cv2
 import numpy as np
 import os
 from tkinter import Tk
 from tkinter.filedialog import askdirectory
+
+from PIL.SpiderImagePlugin import iforms
+
 from AdvancedImage import AdvancedImage
 
 
 class Rotation:
-    def __init__(self, image):
-        self.image = image  # self.image'ı doğrudan image ile ayarladık
+    def __init__(self, image_path,txt_path):
+        self.image_path = image_path
+        self.image = cv2.imread(self.image_path)
+        self.txt_path = txt_path
 
     def rotate_image(self, angle):
         (height, width) = self.image.shape[:2]
         center = (width // 2, height // 2)
-        transform_matrix = cv2.getRotationMatrix2D(center, angle, 0.71)
+        transform_matrix = cv2.getRotationMatrix2D(center, angle, 0.9)
         rotated = cv2.warpAffine(self.image, transform_matrix, (width, height))
-        return rotated
+        return rotated,transform_matrix
 
-    def process_image(self, remove_black=False, add_sharpened=False, save_path=''):
+    def process_image(self, remove_black=False, add_sharpened=False, save_path='',rotate_label=False):
         advanced_image = AdvancedImage(self.image)
-
+        base_image_file_name = os.path.splitext(self.image_path)[0]
         if add_sharpened:
             self.image = advanced_image.sharpen_image()
 
@@ -34,43 +38,162 @@ class Rotation:
 
         # Kaydetme dizinini oluştur varsa yoksa
         os.makedirs(save_path, exist_ok=True)
-        print(f"Directory created or already exists: {save_path}")
-
-        # Belirli açı aralıklarında döndürme ve opsiyonel olarak arka planı kaldırma işlemi
-        for angle in range(0, 360, 30):
-            rotated_image = self.rotate_image(angle)  # Doğrudan angle'ı kullanıyoruz
-            advanced_image_remove_back = AdvancedImage(rotated_image)
-            result_image = advanced_image_remove_back.remove_black_background() if remove_black else rotated_image
-
-            output_file_path = os.path.join(save_path, f'rotated_image_{angle}.png')
-            success = cv2.imwrite(output_file_path, result_image)
 
 
+        if rotate_label:
+            base_txt_file_name=os.path.splitext(self.txt_path)[0]
+            labels = self.read_labels_from_file(self.txt_path)  # Etiket dosyasını oku
+
+            for angle in range(0, 360, 45):
+                rotated_image, transform_matrix = self.rotate_image(angle)  # Görüntüyü döndür
+                advanced_image_remove_back = AdvancedImage(rotated_image)
+                result_image = advanced_image_remove_back.remove_black_background() if remove_black else rotated_image
+
+                # Etiketleri döndür ve yaz
+                rotated_labels = []
+                for label in labels:
+                    class_id, x_center, y_center, width, height = label
+                    rotated_label = self.rotate_labels(x_center, y_center, width, height, self.image.shape[1],
+                                                       self.image.shape[0], transform_matrix)
+                    rotated_labels.append([class_id] + list(rotated_label))  # Yeni etiketleri ekle
+
+                output_txt_file_path = os.path.join(save_path, f'{base_txt_file_name}_{angle}.txt')
+                self.write_labels_to_file(output_txt_file_path, rotated_labels)
+
+                # Sonuç görüntüsünü kaydet
+                output_image_file_path = os.path.join(save_path, f'{base_image_file_name}_{angle}.png')
+                success = cv2.imwrite(output_image_file_path, result_image)
 
 
-test_image_path = 'resim4.jpeg'  # Test için kullanılan görüntü dosyasının yolu
-image = cv2.imread(test_image_path)
+        else:
+            # Belirli açı aralıklarında döndürme ve opsiyonel olarak arka planı kaldırma işlemi
+            for angle in range(0, 360, 45):
+                rotated_image = self.rotate_image(angle)  # Görüntüyü döndür
+                advanced_image_remove_back = AdvancedImage(rotated_image)
+                result_image = advanced_image_remove_back.remove_black_background() if remove_black else rotated_image
 
-if image is None:
-    raise FileNotFoundError(f"{test_image_path} bulunamadı. Lütfen geçerli bir dosya yolu girin.")
+                output_image_file_path = os.path.join(save_path, f'{base_image_file_name}_{angle}.png')
+                success = cv2.imwrite(output_image_file_path, result_image)
 
-rotation = Rotation(image)
+    def rotate_labels(self,x, y, width, height, image_width, image_height, transform_matrix):
+        # Normalize edilmiş değerleri piksel değerlerine geri çevir
+        x_pixel = x * image_width
+        y_pixel = y * image_height
+        width_pixel = width * image_width
+        height_pixel = height * image_height
+
+        # Bounding box köşelerini belirle (piksel cinsinden)
+        corners = np.array([
+            [x_pixel - width_pixel / 2, y_pixel - height_pixel / 2],
+            [x_pixel + width_pixel / 2, y_pixel - height_pixel / 2],
+            [x_pixel - width_pixel / 2, y_pixel + height_pixel / 2],
+            [x_pixel + width_pixel / 2, y_pixel + height_pixel / 2]
+        ])
+
+        # Köşe noktalarını döndürme matrisi ile çarp
+        ones = np.ones(shape=(len(corners), 1))
+        corners_ones = np.hstack([corners, ones])
+
+        rotated_corners = transform_matrix.dot(corners_ones.T).T
+
+        # Yeni bounding box'ı oluştur (piksel cinsinden)
+        x_new_pixel = (rotated_corners[:, 0].min() + rotated_corners[:, 0].max()) / 2
+        y_new_pixel = (rotated_corners[:, 1].min() + rotated_corners[:, 1].max()) / 2
+        width_new_pixel = rotated_corners[:, 0].max() - rotated_corners[:, 0].min()
+        height_new_pixel = rotated_corners[:, 1].max() - rotated_corners[:, 1].min()
+
+        # Normalize edilerek geri döndür
+        x_new_norm = x_new_pixel / image_width
+        y_new_norm = y_new_pixel / image_height
+        width_new_norm = min(width_new_pixel / image_width, 1.0)  # Genişliği 1 ile sınırlandır
+        height_new_norm = min(height_new_pixel / image_height, 1.0)  # Yüksekliği 1 ile sınırlandır
+
+        return x_new_norm, y_new_norm, width_new_norm, height_new_norm
+
+
+    def read_labels_from_file(self, file_path):
+        labels = []
+        with open(file_path, 'r') as file:
+            for line in file:
+                # Satırı boşluklardan ayır ve değerleri bir liste olarak döndür
+                values = line.strip().split()
+
+                # İlk eleman sınıf (int), diğerleri x_center, y_center, width, height (float)
+                label_class = int(values[0])
+                x_center = float(values[1])
+                y_center = float(values[2])
+                width = float(values[3])
+                height = float(values[4])
+
+                # Her satırı ayrı bir liste yapıp labels listesine ekliyoruz
+                labels.append([label_class, x_center, y_center, width, height])
+
+        return labels
+
+    def write_labels_to_file(self, file_path, labels):
+        with open(file_path, 'w') as file:
+            for label in labels:
+                # label tuple'ını ayırıyoruz
+                class_id, x_center, y_center, width, height = label
+
+                x_center = x_center + 1 if x_center < 0 else x_center
+                y_center = y_center + 1 if y_center < 0 else y_center
+                # Sonuçları kontrol et
+                print(f"x_center: {x_center}, y_center: {y_center}")
+                width = width
+                height = height
+
+                # Dosyaya yazıyoruz
+                file.write(f"{class_id} {x_center} {y_center} {width} {height}\n")
+
+
+
+"""
+#Test
+test_image_path = 'resim1.png'  # Test için kullanılan görüntü dosyasının yolu
+
+rotation = Rotation(test_image_path,"resim4.txt")
 
 try:
     # Test için görüntüyü döndür ve kaydet
-    rotation.process_image(remove_black=True, add_sharpened=True)
+    rotation.process_image(remove_black=True, add_sharpened=True,rotate_label=True)
 except Exception as e:
     print(f"Test sırasında bir hata oluştu: {e}")
 
+
 """
-Tk().withdraw()
-save_path = askdirectory(title="Kayıt Yeri Seçin")  # Kullanıcıdan kayıt yeri seçmesini iste
 
-#test
-image = cv2.imread("resim4.jpeg")
 
-if image is None:
-    print("Image not found")
-else:
-    process_image(image, remove_black=True, add_sharpened=True, save_path=save_path)
+
+"""
+input_file_path = 'resim4.txt'  # Okuyacağınız dosya
+base_output_file_name = os.path.splitext(input_file_path)[0]  # Dosya adını ve uzantıyı ayırıyoruz
+
+
+try:
+    # Label değerlerini dosyadan okuyalım
+    labels = rotation.read_labels_from_file(input_file_path)  # Doğru çağrı
+    print(f"Original Labels: {labels}")
+
+    # Her bir açı için döndürülmüş label değerlerini yazalım
+    for angle in range(0, 360, 45):
+        # Dönüşüm işlemini gerçekleştiriyoruz
+        rotated_labels = [rotation.rotate_labels([label], angle) for label in labels]
+
+        # Dönüşümden sonra listeyi düzleştirelim
+        flattened_labels = [item for sublist in rotated_labels for item in sublist]
+
+        print(f"Angle: {angle} degrees, Rotated Labels: {flattened_labels}")
+
+        # Yeni dosya adını oluştur
+        output_file_path = f"{base_output_file_name}_{angle}.txt"
+
+        # Yeni dosyaya yazma
+        rotation.write_labels_to_file(output_file_path, flattened_labels)
+        print(f"Rotated labels written to {output_file_path} for angle {angle}")
+
+except FileNotFoundError as e:
+    print(f"Hata: {e}")
+except Exception as e:
+    print(f"Beklenmeyen bir hata oluştu: {e}")
 """
