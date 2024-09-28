@@ -13,7 +13,7 @@ def return_labeled_data():
     save_path = ""
     all_label_dir = {}
 
-    def getAllLabel():
+    def get_all_label():
         nonlocal all_label_dir
         direct_select = ds()
         all_label_dir = direct_select.select_directory()
@@ -29,23 +29,24 @@ def return_labeled_data():
             messagebox.showerror("Error", "No directory selected.")
             return
         if not save_path:
-            result_label.config(text="Error: No save path selected.")
+            save_label.config(text="Error: No save path selected.")
             messagebox.showerror("Error", "No save path selected.")
             return
 
         # Seçilen dizinler üzerinden işleme başla
         for image_path, txt_path in all_label_dir.items():
             Rotation(image_path, txt_path).process_image(rotate_label=True, save_path=save_path,remove_black=True,add_sharpened=True)
-        result_label.config(text="Process completed successfully!")
+        messagebox.showinfo(title="Process Completed", message="Process completed successfully!")
+
 
     save_button = tk.Button(window, text="Select Save Path", command=select_save_path)
     save_button.pack(pady=10)
 
-    save_label = tk.Label(window, text="No Save Path selected.")
+    save_label = tk.Label(window, text="")
     save_label.pack(pady=10)
 
     # Dizin seçme butonunu ekle
-    directory_button = tk.Button(window, text="Select Directory for Labeled Data", command=getAllLabel)
+    directory_button = tk.Button(window, text="Select Directory for Labeled Data", command=get_all_label)
     directory_button.pack(pady=10)
 
     result_label = tk.Label(window, text="")
@@ -65,7 +66,6 @@ def add_noise_to_batch():
     def onclick():
         print("Batch noise addition logic")
 
-    # Batch noise butonunu ekle
     process_button = tk.Button(window, text="Add Noise to Batch", command=onclick)
     process_button.pack(pady=20)
 
@@ -80,7 +80,6 @@ def add_noise_to_single_image():
     def onclick():
         print("Single image noise addition logic")
 
-    # Single image noise butonunu ekle
     process_button = tk.Button(window, text="Add Noise to Single Image", command=onclick)
     process_button.pack(pady=20)
 
@@ -100,22 +99,21 @@ def main_screen():
     global window, result_label
     window = tk.Tk()
     window.title("Image Processing Application")
-    window.geometry("600x400")  # Set window size
+    window.geometry("800x600")
 
-    # Create a menu bar
     menu_bar = tk.Menu(window)
 
     operation_menu = tk.Menu(menu_bar, tearoff=0)
     menu_bar.add_cascade(label="Operations", menu=operation_menu)
 
-    # Add menu items
+
     operation_menu.add_command(label="Return Labeled Data", command=return_labeled_data)
     operation_menu.add_command(label="Add Noise to Batch", command=add_noise_to_batch)
     operation_menu.add_command(label="Add Noise to Single Image", command=add_noise_to_single_image)
 
     window.config(menu=menu_bar)
 
-    # Result mesajı için global bir label oluştur
+    # Result mesajı için global bir label
     result_label = tk.Label(window, text="Please select an operation.")
     result_label.pack(pady=10)
 
