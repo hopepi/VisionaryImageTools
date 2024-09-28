@@ -7,8 +7,6 @@ class AdvancedImage:
         self.image = image
 
     def decrease_brightness(self, value):
-        # Parlaklığı azaltmak için görüntüyü koyulaştır
-        # 0 ile 255 arasında bir değer olmalıdır
         value = max(0, min(255, value))
 
         # Parlaklığı azaltma
@@ -26,10 +24,11 @@ class AdvancedImage:
         smoothed = cv2.GaussianBlur(sharpened, (3, 3), 0)
         return smoothed
 
+
     """
     def sharpen_image_with_blur(self):
         # Gaussian bulanıklaştırma
-        blurred = cv2.GaussianBlur(image, (5, 5), 0)
+        blurred = cv2.GaussianBlur(self.image, (5, 5), 0)
 
         # Kenarları keskinleştirme
         sharpened = cv2.addWeighted(image, 1.5, blurred, -0.5, 0)
@@ -39,13 +38,14 @@ class AdvancedImage:
 
     def unsharp_mask(self, sigma=1.0, alpha=1.5):
         # Gaussian bulanıklaştırma
-        blurred = cv2.GaussianBlur(image, (0, 0), sigma)
+        blurred = cv2.GaussianBlur(self.image, (0, 0), sigma)
 
         # Keskinleştirilmiş görüntüyü oluştur
-        sharpened = cv2.addWeighted(image, 1 + alpha, blurred, -alpha, 0)
+        sharpened = cv2.addWeighted(self.image, 1 + alpha, blurred, -alpha, 0)
 
         return sharpened
     """
+
 
     def remove_black_background(self):
         # Görüntüyü bgr den rgba ya dönüştür
@@ -57,7 +57,6 @@ class AdvancedImage:
         # Tamamen siyah piksel tespiti
         black_pixels = (b_channel == 0) & (g_channel == 0) & (r_channel == 0)
 
-        # Siyah alanları şeffaf yapmak
         alpha_channel[black_pixels] = 0  # Siyah bölgeler için alfa 0 (şeffaf)
 
         # Sonuç görüntüsünü oluştur
@@ -112,7 +111,7 @@ class AdvancedImage:
         # Renk kanallarını ayır
         b, g, r = cv2.split(self.image)
 
-        # Her kanal için rastgele bir çarpan belirle
+        # Her kanal için rastgele bir çarpan
         b_factor = random.uniform(0.7, 1.2)  # Mavi kanal için çarpan
         g_factor = random.uniform(0.7, 1.2)  # Yeşil kanal için çarpan
         r_factor = random.uniform(0.7, 1.2)  # Kırmızı kanal için çarpan
@@ -129,7 +128,6 @@ class AdvancedImage:
 
     # ksize: Bulanıklık penceresinin boyutu
     def apply_blur(self, ksize=5):
-        # Görüntüyü bulanıklaştır
         blurred_image = cv2.GaussianBlur(self.image, (ksize, ksize), 0)
 
         return blurred_image

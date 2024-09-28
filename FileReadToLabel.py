@@ -1,12 +1,14 @@
 class LabelProcessor:
     """
-    yani yalnızca aldığı parametreler ile işlem yapıyorsa
+    Yalnızca aldığı parametreler ile işlem yapıyorsa
     @staticmethod kullanılıyor
     """
     @staticmethod
     def read_labels_from_file(file_path):
+        if not file_path.endswith('.txt'):
+            raise ValueError(f"Expected a .txt file, but got {file_path}")
         labels = []
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r',encoding='ISO-8859-1') as file:
             for line in file:
                 values = line.strip().split()
                 label_class = int(values[0])

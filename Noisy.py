@@ -75,3 +75,21 @@ class ImageNoiseAugmentor:
 
         return noisy_image
 
+    def add_multiplicative_noise(self, mean=1, var=0.1):
+        row, col, ch = self.image.shape
+        noise = np.random.normal(mean, var, (row, col, ch))
+        noisy_image = self.image * noise
+        return np.clip(noisy_image, 0, 255).astype(np.uint)
+
+    def add_random_pixel_noise(self, num_noise_points=120):
+        height, width, _ = self.image.shape
+        noisy_image = self.image.copy()
+
+        # Gürültü için rastgele koordinatlar
+        coords = [(np.random.randint(0, height), np.random.randint(0, width)) for _ in range(num_noise_points)]
+
+        for coord in coords:
+            if coord[0] < height and coord[1] < width:
+                noisy_image[coord[0], coord[1]] = np.random.choice([0, 255])
+
+        return noisy_image

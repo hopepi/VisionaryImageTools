@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import os
 from AdvancedImage import AdvancedImage
-from FileReadToLabel import LabelProcessor  # LabelProcessor'ı içe aktarıyoruz
+from FileReadToLabel import LabelProcessor  # LabelProcessorı içe aktarma
 
 class Rotation:
     def __init__(self, image_path, txt_path):
@@ -52,7 +52,7 @@ class Rotation:
                 output_txt_file_path = os.path.join(save_path, f'{base_txt_file_name}_{angle}.txt')
                 LabelProcessor.write_labels_to_file(output_txt_file_path, rotated_labels)
 
-                # Görüntüyü kaydet
+
                 output_image_file_path = os.path.join(save_path, f'{base_image_file_name}_{angle}.png')
                 success = cv2.imwrite(output_image_file_path, result_image)
                 if not success:
