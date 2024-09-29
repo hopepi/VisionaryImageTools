@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from tkinter import messagebox
 from DirectorySelect import DirectorySelect as ds
@@ -44,10 +45,11 @@ def return_labeled_data():
             messagebox.showerror("Error", "No save path selected.")
             return
 
-
+        wait_label.config(text="THE PROCESS HAS STARTED, PLEASE WAIT")
         # Seçilen dizinler üzerinden işleme başla
         for image_path, txt_path in all_label_dir.items():
-            Rotation(image_path, txt_path).process_image(rotate_label=True, save_path=save_path,remove_black=True,add_sharpened=True)
+            Rotation(image_path).process_image(rotate_label=True, save_path=save_path,remove_black=True,add_sharpened=False,txt_path=txt_path)
+        wait_label.config(text="THE PROCESS HAS COMPLETE")
         messagebox.showinfo(title="Process Completed", message="Process completed successfully!")
 
 
@@ -68,6 +70,74 @@ def return_labeled_data():
     process_button = tk.Button(window, text="Start Process", command=start_process)
     process_button.pack(pady=20)
 
+    wait_label = tk.Label(window,text="", font=("Arial", 16))
+    wait_label.pack(pady=10)
+
+
+def return_just_images_data():
+    clear_widgets()
+
+    global save_button, save_label, process_button, result_label
+    save_path = ""
+    all_image_dir = []
+
+    def get_images():
+        nonlocal all_image_dir
+        direct_select = ds()
+        all_image_dir = direct_select.select_image_list()
+
+        if all_image_dir:
+            first_item = all_image_dir[0]
+            cleaned_item = first_item.split('\\')[0].strip()
+            result_label.config(
+                text=f"Selected Label Path: {cleaned_item} --> Tagged images count: {len(all_image_dir)}")
+        else:
+            result_label.config(text=f"Not found tagged image")
+
+    def select_save_path():
+        nonlocal save_path
+        direct_select = ds()
+        save_path = direct_select.select_save_directory()
+
+        if save_path:
+            save_label.config(text=f"Save Path: {save_path}")
+
+    def start_process():
+        if not all_image_dir:
+            result_label.config(text="Error: No directory selected.")
+            messagebox.showerror("Error", "No directory selected.")
+            return
+        if not save_path:
+            save_label.config(text="Error: No save path selected.")
+            messagebox.showerror("Error", "No save path selected.")
+            return
+
+        wait_label.config(text="THE PROCESS HAS STARTED, PLEASE WAIT")
+        # Seçilen dizinler üzerinden işleme başla
+        for image_path in all_image_dir:
+            Rotation(image_path).process_image(rotate_label=False, save_path=save_path,remove_black=True,add_sharpened=False)
+        wait_label.config(text="THE PROCESS HAS COMPLETE")
+        messagebox.showinfo(title="Process Completed", message="Process completed successfully!")
+
+    save_button = tk.Button(window, text="Select Save Path", command=select_save_path)
+    save_button.pack(pady=10)
+
+    save_label = tk.Label(window, text="")
+    save_label.pack(pady=10)
+
+    # Dizin seçme butonunu ekle
+    directory_button = tk.Button(window, text="Select Directory for Just Images", command=get_images)
+    directory_button.pack(pady=10)
+
+    result_label = tk.Label(window, text="")
+    result_label.pack(pady=10)
+
+    # İşleme başla butonunu ekle
+    process_button = tk.Button(window, text="Start Process", command=start_process)
+    process_button.pack(pady=20)
+    wait_label = tk.Label(window, text="", font=("Arial", 16))
+    wait_label.pack(pady=10)
+
 
 def add_noise_to_batch():
     clear_widgets()
@@ -84,7 +154,9 @@ def add_noise_to_batch():
         "Brightness Contrast Random": False,
         "Random Contrast": False,
         "Color Distortion": False,
-        "Add Blur": False
+        "Add Blur": False,
+        "Add Sharpness": False,
+        "Add Smoothed Sharpness": False
     }#Eleman eklicen zaman dikkat et ImageNoiseProcessorda güncelleme yapman lazım
 
     def update_noise_value(value):
@@ -112,7 +184,9 @@ def add_noise_to_batch():
             if selected:
                 selected_noisy.append(item)
         image_noise_processor = ImageNoiseProcessor(save_path=save_path)
+        wait_label.config(text="THE PROCESS HAS STARTED, PLEASE WAIT")
         image_noise_processor.add_random_noisy_label_images(all_image_tagged_map=all_label_dir,noisy_weight=noise_value,noisy_list=selected_noisy)
+        wait_label.config(text="THE PROCESS HAS COMPLETE")
         messagebox.showinfo(title="Process Completed", message="Process completed successfully!")
 
 
@@ -179,6 +253,9 @@ def add_noise_to_batch():
     process_button = tk.Button(window, text="Add Noise to Batch", command=click_progress)
     process_button.pack(pady=20)
 
+    wait_label = tk.Label(window, text="", font=("Arial", 16))
+    wait_label.pack(pady=10)
+
 
 def add_noise_to_just_image():
     clear_widgets()
@@ -195,13 +272,14 @@ def add_noise_to_just_image():
         "Brightness Contrast Random": False,
         "Random Contrast": False,
         "Color Distortion": False,
-        "Add Blur": False
+        "Add Blur": False,
+        "Add Sharpness": False,
+        "Add Smoothed Sharpness": False
     }  # Eleman eklicen zaman dikkat et ImageNoiseProcessorda güncelleme yapman lazım
 
     def update_noise_value(value):
         nonlocal noise_value
         noise_value = int(value)
-
 
 
     def click_process():
@@ -226,7 +304,9 @@ def add_noise_to_just_image():
 
 
         image_noise_processor = ImageNoiseProcessor(save_path=save_path)
+        wait_label.config(text="THE PROCESS HAS STARTED, PLEASE WAIT")
         image_noise_processor.add_random_noisy_images(all_images=all_images_dir,noisy_weight=noise_value,noisy_list=selected_noisy)
+        wait_label.config(text="THE PROCESS HAS COMPLETE")
         messagebox.showinfo(title="Process Completed", message="Process completed successfully!")
 
 
@@ -289,6 +369,9 @@ def add_noise_to_just_image():
     process_button = tk.Button(window, text="Add Noise to just image", command=click_process)
     process_button.pack(pady=20)
 
+    wait_label = tk.Label(window, text="", font=("Arial", 16))
+    wait_label.pack(pady=10)
+
 
 def add_noise_to_one_image():
     clear_widgets()
@@ -305,7 +388,9 @@ def add_noise_to_one_image():
         "Brightness Contrast Random": False,
         "Random Contrast": False,
         "Color Distortion": False,
-        "Add Blur": False
+        "Add Blur": False,
+        "Add Sharpness": False,
+        "Add Smoothed Sharpness": False
     }  # Eleman eklicen zaman dikkat et ImageNoiseProcessorda güncelleme yapman lazım
 
 
@@ -337,7 +422,9 @@ def add_noise_to_one_image():
                 selected_noisy.append(item)
 
         image_noise_processor = ImageNoiseProcessor(save_path=save_path)
+        wait_label.config(text="THE PROCESS HAS STARTED, PLEASE WAIT")
         image_noise_processor.add_noisy_one_image(image_path=images_dir,noisy_list=selected_noisy)
+        wait_label.config(text="THE PROCESS HAS COMPLETE")
         messagebox.showinfo(title="Process Completed", message="Process completed successfully!")
 
     def select_image():
@@ -382,6 +469,9 @@ def add_noise_to_one_image():
     process_button = tk.Button(window, text="Add Noise to just image", command=click_process)
     process_button.pack(pady=20)
 
+    wait_label = tk.Label(window, text="", font=("Arial", 16))
+    wait_label.pack(pady=10)
+
 
 def apply_black_and_white_effect_to_batch():
     clear_widgets()
@@ -424,7 +514,9 @@ def apply_black_and_white_effect_to_batch():
             messagebox.showerror("Error", "Please selected save path")
             return
         image_bw_processor = ImageBlackAndWhiteProcessor(save_path=save_path)
+        wait_label.config(text="THE PROCESS HAS STARTED, PLEASE WAIT")
         image_bw_processor.add_random_bw_label_images(all_image_tagged_map = all_label_dir, bw_weight = bw_points)
+        wait_label.config(text="THE PROCESS HAS COMPLETE")
         messagebox.showinfo(title="Process Completed", message="Process completed successfully!")
 
 
@@ -448,6 +540,9 @@ def apply_black_and_white_effect_to_batch():
 
     process_button = tk.Button(window, text="Apply Black And White Effect To Batch", command=click_progress)
     process_button.pack(pady=20)
+
+    wait_label = tk.Label(window, text="", font=("Arial", 16))
+    wait_label.pack(pady=10)
 
 
 def apply_black_and_white_effect_to_just_image():
@@ -492,7 +587,9 @@ def apply_black_and_white_effect_to_just_image():
             return
 
         image_bw_processor = ImageBlackAndWhiteProcessor(save_path=save_path)
+        wait_label.config(text="THE PROCESS HAS STARTED, PLEASE WAIT")
         image_bw_processor.add_random_bw_images(all_images_list=all_images_dir, bw_weight=bw_points)
+        wait_label.config(text="THE PROCESS HAS COMPLETE")
         messagebox.showinfo(title="Process Completed", message="Process completed successfully!")
 
 
@@ -517,6 +614,9 @@ def apply_black_and_white_effect_to_just_image():
     process_button = tk.Button(window, text="Add Black And White Filter To just image", command=click_process)
     process_button.pack(pady=20)
 
+    wait_label = tk.Label(window, text="", font=("Arial", 16))
+    wait_label.pack(pady=10)
+
 
 def clear_widgets():
     for widget in window.winfo_children():
@@ -526,6 +626,7 @@ def clear_widgets():
 def on_closing():
     if messagebox.askokcancel("Quit", "Do you want to quit?"):
         window.destroy()
+        os._exit(0)
 
 
 def main_screen():
@@ -539,6 +640,7 @@ def main_screen():
     operation_menu = tk.Menu(menu_bar, tearoff=0)
     menu_bar.add_cascade(label="Add Rotation", menu=operation_menu)
     operation_menu.add_command(label="Add Rotation Label And Images", command=return_labeled_data)
+    operation_menu.add_command(label="Add Rotation Just Images", command=return_just_images_data)
 
     operation_menu = tk.Menu(menu_bar, tearoff=0)
     menu_bar.add_cascade(label="Add Noisy", menu=operation_menu)

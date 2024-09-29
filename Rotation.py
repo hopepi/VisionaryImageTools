@@ -7,10 +7,9 @@ from AdvancedImage import AdvancedImage
 from FileReadToLabel import LabelProcessor  # LabelProcessorı içe aktarma
 
 class Rotation:
-    def __init__(self, image_path, txt_path):
+    def __init__(self, image_path):
         self.image_path = image_path
         self.image = cv2.imread(self.image_path)
-        self.txt_path = txt_path
 
     def rotate_image(self, angle):
         (height, width) = self.image.shape[:2]
@@ -19,7 +18,7 @@ class Rotation:
         rotated = cv2.warpAffine(self.image, transform_matrix, (width, height))
         return rotated, transform_matrix
 
-    def process_image(self, remove_black=False, add_sharpened=False, save_path="", rotate_label=False):
+    def process_image(self, remove_black=False, add_sharpened=False, save_path="", rotate_label=False,txt_path=""):
         advanced_image = AdvancedImage(self.image)
         base_image_file_name = os.path.splitext(os.path.basename(self.image_path))[0]  # Dosya adı ve uzantıyı ayır
 
@@ -34,11 +33,10 @@ class Rotation:
             os.makedirs(save_path, exist_ok=True)
 
         if rotate_label:
-            base_txt_file_name = os.path.splitext(os.path.basename(self.txt_path))[0]  # Txt dosya adı
+            base_txt_file_name = os.path.splitext(os.path.basename(txt_path))[0]  # Txt dosya adı
+            labels = LabelProcessor.read_labels_from_file(txt_path)
 
-            labels = LabelProcessor.read_labels_from_file(self.txt_path)
-
-            for angle in range(0, 360, 45):
+            for angle in range(75, 360, 75):
                 unique_id = str(uuid.uuid4())
                 timestamp = int(time.time())
                 rotated_image, transform_matrix = self.rotate_image(angle)
@@ -63,7 +61,7 @@ class Rotation:
                     print(f"Error saving image at {output_image_file_path}")
 
         else:
-            for angle in range(0, 360, 45):
+            for angle in range(75, 360, 75):
                 unique_id = str(uuid.uuid4())
                 timestamp = int(time.time())
                 rotated_image, transform_matrix = self.rotate_image(angle)

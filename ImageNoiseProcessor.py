@@ -166,6 +166,10 @@ class ImageNoiseProcessor:
             image = advanced_image_tools.color_distortion()
         elif noisy_method_name == "Add Blur":
             image = advanced_image_tools.apply_blur()
+        elif noisy_method_name == "Add Sharpness":
+            image = advanced_image_tools.sharpen_image()
+        elif noisy_method_name == "Add Smoothed Sharpness":
+            image = advanced_image_tools.sharpen_smoothed_image()
         else:
             raise ValueError("invalidation process")
         return image

@@ -8,13 +8,19 @@ class AdvancedImage:
 
     def decrease_brightness(self, value):
         value = max(0, min(255, value))
-
-        # Parlaklığı azaltma
         darkened_image = cv2.subtract(self, (value, value, value, 0))  # BGR formatında çıkarma işlemi
-
         return darkened_image
 
     def sharpen_image(self):
+        # Keskinleştirme için kernel tanımlama
+        kernel = np.array([[0, -1, 0],
+                           [-1, 5, -1],
+                           [0, -1, 0]])
+
+        sharpened = cv2.filter2D(self.image, -1, kernel)
+        return sharpened
+
+    def sharpen_smoothed_image(self):
         # Keskinleştirme için kernel tanımlama
         kernel = np.array([[0, -1, 0],
                            [-1, 5, -1],
