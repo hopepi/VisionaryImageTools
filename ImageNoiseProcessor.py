@@ -1,9 +1,11 @@
 import os
 import random
+import time
 from FileReadToLabel import LabelProcessor
 import cv2
 from Noisy import ImageNoiseAugmentor
 from AdvancedImage import AdvancedImage
+import uuid
 
 
 class ImageNoiseProcessor:
@@ -68,6 +70,8 @@ class ImageNoiseProcessor:
                 LabelProcessor.write_labels_to_file(output_txt_file_path, labels)
             index += 1
 
+
+
     def add_random_noisy_images(self, all_images, noisy_weight, noisy_list):
         total_tagged_images = len(all_images)
         num_images_to_modify = int((noisy_weight / 100) * total_tagged_images)
@@ -106,6 +110,26 @@ class ImageNoiseProcessor:
             if not success:
                 print(f"Error saving image at {output_image_file_path}")
             index += 1
+
+
+
+    def add_noisy_one_image(self, image_path, noisy_list):
+        unique_id = str(uuid.uuid4())
+        timestamp = int(time.time())
+        if not self.save_path:
+            self.save_path = '.'
+        base_image_file_name = os.path.splitext(os.path.basename(image_path))[0]
+
+        self.__image__ = cv2.imread(image_path)
+        for noisy in noisy_list:
+            self.__image__ = self.noisy_transactions(noisy_method_name=noisy, image=self.__image__)
+
+        output_image_file_path = os.path.join(self.save_path, f'{base_image_file_name}_{unique_id}_{timestamp}.png')
+        success = cv2.imwrite(output_image_file_path, self.__image__)
+
+        if not success:
+            print(f"Error saving image at {output_image_file_path}")
+
 
 
     def noisy_transactions(self,noisy_method_name,image):

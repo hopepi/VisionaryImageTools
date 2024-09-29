@@ -295,6 +295,98 @@ def add_noise_to_just_image():
 
 
 
+def add_noise_to_one_image():
+    clear_widgets()
+
+    save_path = ""
+    images_dir = ""
+
+    checkbox_states = {
+        "Poisson Noisy": False,
+        "Salt And Pepper Noisy": False,
+        "Gaussian Noise": False,
+        "Random Pixel Noise": False,
+        "Multiplicative Noise": False,
+        "Brightness Contrast Random": False,
+        "Random Contrast": False,
+        "Color Distortion": False,
+        "Add Blur": False
+    }  # Eleman eklicen zaman dikkat et ImageNoiseProcessorda güncelleme yapman lazım
+
+
+    def select_save_path():
+        nonlocal save_path
+        direct_select = ds()
+        save_path = direct_select.select_save_directory()
+        if save_path:
+            save_label.config(text=f"Save Path: {save_path}")
+
+    def click_process():
+        selected_count = 0
+        selected_noisy = []
+        for selected in checkbox_states.values():
+            if selected:
+                selected_count += 1
+
+        if selected_count == 0:  # Hiçbir öğe seçili değilse
+            messagebox.showerror("Error", "No selected options found")
+            return
+        if len(images_dir) == 0:
+            messagebox.showerror("Error", "Please selected images path")
+            return
+        if save_path == "":
+            messagebox.showerror("Error", "Please selected save path")
+            return
+        for item, selected in checkbox_states.items():
+            if selected:
+                selected_noisy.append(item)
+
+        image_noise_processor = ImageNoiseProcessor(save_path=save_path)
+        image_noise_processor.add_noisy_one_image(image_path=images_dir,noisy_list=selected_noisy)
+
+    def select_image():
+        nonlocal images_dir
+        direct_select = ds()
+        images_dir = direct_select.select_image()
+        if images_dir:
+            directory_select_label.config(
+                text=f"Selected Images Path: {images_dir}")
+        else:
+            directory_select_label.config(text=f"Not found tagged image")
+
+    save_button = tk.Button(window, text="Select Save Path", command=select_save_path)
+    save_button.pack(pady=10)
+
+    save_label = tk.Label(window, text="")
+    save_label.pack(pady=10)
+
+    directory_select = tk.Button(window, text="Select image directory", command=select_image)
+    directory_select.pack(pady=10)
+
+    directory_select_label = tk.Label(window, text="")
+    directory_select_label.pack(pady=10)
+
+    checkbox_frame = tk.Frame(window)
+    checkbox_frame.pack(pady=10)
+
+    index = 0
+
+    for item_name in checkbox_states.keys():
+        var = tk.BooleanVar(value=checkbox_states[item_name])
+
+        def update_state(item_name=item_name, var=var):
+            checkbox_states[item_name] = var.get()
+
+        checkbox = tk.Checkbutton(checkbox_frame, text=item_name, variable=var, command=update_state)
+        checkbox.grid(row=index // 5, column=index % 5, padx=5, pady=5, sticky='w')
+
+        index += 1
+
+
+    process_button = tk.Button(window, text="Add Noise to just image", command=click_process)
+    process_button.pack(pady=20)
+
+
 
 def clear_widgets():
     for widget in window.winfo_children():
@@ -320,6 +412,7 @@ def main_screen():
     operation_menu.add_command(label="Return Labeled Data", command=return_labeled_data)
     operation_menu.add_command(label="Add Tagged Image Noise to Batch", command=add_noise_to_batch)
     operation_menu.add_command(label="Add Noise to Just Image", command=add_noise_to_just_image)
+    operation_menu.add_command(label="Add Noise to One Image", command=add_noise_to_one_image)
 
     window.config(menu=menu_bar)
 
