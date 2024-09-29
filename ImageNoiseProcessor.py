@@ -22,7 +22,6 @@ class ImageNoiseProcessor:
         total_tagged_images = len(all_image_tagged_map)
         num_images_to_modify = int((noisy_weight / 100) * total_tagged_images)
         selected_images = random.sample(list(all_image_tagged_map.items()), num_images_to_modify)
-        print(selected_images)
 
         if not self.save_path:
             self.save_path = '.'
@@ -69,7 +68,44 @@ class ImageNoiseProcessor:
                 LabelProcessor.write_labels_to_file(output_txt_file_path, labels)
             index += 1
 
+    def add_random_noisy_images(self, all_images, noisy_weight, noisy_list):
+        total_tagged_images = len(all_images)
+        num_images_to_modify = int((noisy_weight / 100) * total_tagged_images)
+        selected_images = random.sample(all_images, num_images_to_modify)
 
+        if not self.save_path:
+            self.save_path = '.'
+
+        half_num_images = num_images_to_modify // 2
+        ordered_images = selected_images[:half_num_images]
+        random_images = selected_images[half_num_images:]
+        index = 0
+
+        for image_path in ordered_images:
+            base_image_file_name = os.path.splitext(os.path.basename(image_path))[0]
+
+            noise_method = noisy_list[index % len(noisy_list)]
+            self.__image__=cv2.imread(image_path)
+            noisy_image = self.noisy_transactions(noisy_method_name=noise_method,image=self.__image__)
+
+            output_image_file_path = os.path.join(self.save_path, f'{base_image_file_name}_{noise_method}.png')
+            success = cv2.imwrite(output_image_file_path, noisy_image)
+            if not success:
+                print(f"Error saving image at {output_image_file_path}")
+            index += 1
+
+        for image_path in random_images:
+            base_image_file_name = os.path.splitext(os.path.basename(image_path))[0]
+
+            noise_method = noisy_list[index % len(noisy_list)]
+            self.__image__=cv2.imread(image_path)
+            noisy_image = self.noisy_transactions(noisy_method_name=noise_method,image=self.__image__)
+
+            output_image_file_path = os.path.join(self.save_path, f'{base_image_file_name}_{noise_method}.png')
+            success = cv2.imwrite(output_image_file_path, noisy_image)
+            if not success:
+                print(f"Error saving image at {output_image_file_path}")
+            index += 1
 
 
     def noisy_transactions(self,noisy_method_name,image):

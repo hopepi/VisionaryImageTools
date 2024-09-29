@@ -60,7 +60,7 @@ class DirectorySelect:
 
             for filename in os.listdir(directory):
                 if filename.endswith('.png') or filename.endswith('.jpg') or filename.endswith('.jpeg'):
-                    images_list.append(filename)
+                    images_list.append(f"{directory}\\{filename}")
 
             return images_list
 
