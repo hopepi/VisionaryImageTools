@@ -1,5 +1,7 @@
+import uuid
 import cv2
 import numpy as np
+import time
 import os
 from AdvancedImage import AdvancedImage
 from FileReadToLabel import LabelProcessor  # LabelProcessorı içe aktarma
@@ -37,6 +39,8 @@ class Rotation:
             labels = LabelProcessor.read_labels_from_file(self.txt_path)
 
             for angle in range(0, 360, 45):
+                unique_id = str(uuid.uuid4())
+                timestamp = int(time.time())
                 rotated_image, transform_matrix = self.rotate_image(angle)
                 advanced_image_remove_back = AdvancedImage(rotated_image)
                 result_image = advanced_image_remove_back.remove_black_background() if remove_black else rotated_image
@@ -49,22 +53,24 @@ class Rotation:
                                                        self.image.shape[0], transform_matrix)
                     rotated_labels.append([class_id] + list(rotated_label))
 
-                output_txt_file_path = os.path.join(save_path, f'{base_txt_file_name}_{angle}.txt')
+                output_txt_file_path = os.path.join(save_path,f'{base_txt_file_name[:10]}_{unique_id}_{timestamp}.txt')
                 LabelProcessor.write_labels_to_file(output_txt_file_path, rotated_labels)
 
 
-                output_image_file_path = os.path.join(save_path, f'{base_image_file_name}_{angle}.png')
+                output_image_file_path = os.path.join(save_path,f'{base_image_file_name[:10]}_{unique_id}_{timestamp}.png')
                 success = cv2.imwrite(output_image_file_path, result_image)
                 if not success:
                     print(f"Error saving image at {output_image_file_path}")
 
         else:
             for angle in range(0, 360, 45):
+                unique_id = str(uuid.uuid4())
+                timestamp = int(time.time())
                 rotated_image, transform_matrix = self.rotate_image(angle)
                 advanced_image_remove_back = AdvancedImage(rotated_image)
                 result_image = advanced_image_remove_back.remove_black_background() if remove_black else rotated_image
 
-                output_image_file_path = os.path.join(save_path, f'{base_image_file_name}_{angle}.png')
+                output_image_file_path = os.path.join(save_path,f'{base_image_file_name[:10]}_{unique_id}_{timestamp}.png')
                 success = cv2.imwrite(output_image_file_path, result_image)
                 if not success:
                     print(f"Error saving image at {output_image_file_path}")

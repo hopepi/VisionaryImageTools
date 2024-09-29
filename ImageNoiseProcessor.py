@@ -34,6 +34,8 @@ class ImageNoiseProcessor:
         index = 0
 
         for image_path,txt_path in ordered_images:
+            unique_id = str(uuid.uuid4())
+            timestamp = int(time.time())
             base_image_file_name = os.path.splitext(os.path.basename(image_path))[0]
             base_txt_file_name = os.path.splitext(os.path.basename(txt_path))[0]
             labels = LabelProcessor.read_labels_from_file(txt_path)
@@ -42,17 +44,19 @@ class ImageNoiseProcessor:
             self.__image__=cv2.imread(image_path)
             noisy_image = self.noisy_transactions(noisy_method_name=noise_method,image=self.__image__)
 
-            output_image_file_path = os.path.join(self.save_path, f'{base_image_file_name}_{noise_method}.png')
+            output_image_file_path = os.path.join(self.save_path,f'{base_image_file_name[:10]}_{unique_id}_{timestamp}.png')
             success = cv2.imwrite(output_image_file_path, noisy_image)
             if not success:
                 print(f"Error saving image at {output_image_file_path}")
             else:
-                output_txt_file_path = os.path.join(self.save_path, f'{base_txt_file_name}_{noise_method}.txt')
+                output_txt_file_path = os.path.join(self.save_path,f'{base_txt_file_name[:10]}_{unique_id}_{timestamp}.txt')
                 LabelProcessor.write_labels_to_file(output_txt_file_path, labels)
             index += 1
 
 
         for image_path,txt_path in random_images:
+            unique_id = str(uuid.uuid4())
+            timestamp = int(time.time())
             base_image_file_name = os.path.splitext(os.path.basename(txt_path))[0]
             base_txt_file_name = os.path.splitext(os.path.basename(image_path))[0]
             labels = LabelProcessor.read_labels_from_file(txt_path)
@@ -61,12 +65,12 @@ class ImageNoiseProcessor:
             self.__image__ = cv2.imread(image_path)
             noisy_image = self.noisy_transactions(noisy_method_name=noise_method, image=self.__image__)
 
-            output_image_file_path = os.path.join(self.save_path, f'{base_image_file_name}_{noise_method}.png')
+            output_image_file_path = os.path.join(self.save_path,f'{base_image_file_name[:10]}_{unique_id}_{timestamp}.png')
             success = cv2.imwrite(output_image_file_path, noisy_image)
             if not success:
                 print(f"Error saving image at {output_image_file_path}")
             else:
-                output_txt_file_path = os.path.join(self.save_path, f'{base_txt_file_name}_{noise_method}.txt')
+                output_txt_file_path = os.path.join(self.save_path,f'{base_txt_file_name[:10]}_{unique_id}_{timestamp}.txt')
                 LabelProcessor.write_labels_to_file(output_txt_file_path, labels)
 
 
@@ -85,26 +89,30 @@ class ImageNoiseProcessor:
         index = 0
 
         for image_path in ordered_images:
+            unique_id = str(uuid.uuid4())
+            timestamp = int(time.time())
             base_image_file_name = os.path.splitext(os.path.basename(image_path))[0]
 
             noise_method = noisy_list[index % len(noisy_list)]
             self.__image__=cv2.imread(image_path)
             noisy_image = self.noisy_transactions(noisy_method_name=noise_method,image=self.__image__)
 
-            output_image_file_path = os.path.join(self.save_path, f'{base_image_file_name}_{noise_method}.png')
+            output_image_file_path = os.path.join(self.save_path, f'{base_image_file_name[:10]}_{unique_id}_{timestamp}.png')
             success = cv2.imwrite(output_image_file_path, noisy_image)
             if not success:
                 print(f"Error saving image at {output_image_file_path}")
             index += 1
 
         for image_path in random_images:
+            unique_id = str(uuid.uuid4())
+            timestamp = int(time.time())
             base_image_file_name = os.path.splitext(os.path.basename(image_path))[0]
 
             noise_method = noisy_list[index % len(noisy_list)]
             self.__image__=cv2.imread(image_path)
             noisy_image = self.noisy_transactions(noisy_method_name=noise_method,image=self.__image__)
 
-            output_image_file_path = os.path.join(self.save_path, f'{base_image_file_name}_{noise_method}.png')
+            output_image_file_path = os.path.join(self.save_path, f'{base_image_file_name[:10]}_{unique_id}_{timestamp}.png')
             success = cv2.imwrite(output_image_file_path, noisy_image)
             if not success:
                 print(f"Error saving image at {output_image_file_path}")
@@ -123,7 +131,7 @@ class ImageNoiseProcessor:
         for noisy in noisy_list:
             self.__image__ = self.noisy_transactions(noisy_method_name=noisy, image=self.__image__)
 
-        output_image_file_path = os.path.join(self.save_path, f'{base_image_file_name}_{unique_id}_{timestamp}.png')
+        output_image_file_path = os.path.join(self.save_path,f'{base_image_file_name[:10]}_{unique_id}_{timestamp}.png')
         success = cv2.imwrite(output_image_file_path, self.__image__)
 
         if not success:

@@ -1,8 +1,10 @@
 import os
 import random
+import uuid
 import cv2
 from FileReadToLabel import LabelProcessor
 from AdvancedImage import AdvancedImage
+import time
 
 class ImageBlackAndWhiteProcessor:
     def __init__(self,save_path):
@@ -24,6 +26,8 @@ class ImageBlackAndWhiteProcessor:
             self.save_path = '.'
 
         for image_path, txt_path in selected_images:
+            unique_id = str(uuid.uuid4())
+            timestamp = int(time.time())
             base_image_file_name = os.path.splitext(os.path.basename(image_path))[0]
             base_txt_file_name = os.path.splitext(os.path.basename(txt_path))[0]
             labels = LabelProcessor.read_labels_from_file(txt_path)
@@ -32,12 +36,12 @@ class ImageBlackAndWhiteProcessor:
             advanced_image_tools = AdvancedImage(self.__image__)
             bw_image = advanced_image_tools.apply_black_and_white()
 
-            output_image_file_path = os.path.join(self.save_path, f'{base_image_file_name}_blackAndWhiteFilter.png')
+            output_image_file_path = os.path.join(self.save_path, f'{base_image_file_name[:10]}_{unique_id}_{timestamp}.png')
             success = cv2.imwrite(output_image_file_path, bw_image)
             if not success:
                 print(f"Error saving image at {output_image_file_path}")
             else:
-                output_txt_file_path = os.path.join(self.save_path, f'{base_txt_file_name}_blackAndWhiteFilter.txt')
+                output_txt_file_path = os.path.join(self.save_path,f'{base_txt_file_name[:10]}_{unique_id}_{timestamp}.txt')
                 LabelProcessor.write_labels_to_file(output_txt_file_path, labels)
 
     def add_random_bw_images(self,all_images_list,bw_weight):
@@ -49,13 +53,15 @@ class ImageBlackAndWhiteProcessor:
             self.save_path = '.'
 
         for image_path in selected_images:
+            unique_id = str(uuid.uuid4())
+            timestamp = int(time.time())
             base_image_file_name = os.path.splitext(os.path.basename(image_path))[0]
 
             self.__image__ = cv2.imread(image_path)
             advanced_image_tools = AdvancedImage(self.__image__)
             bw_image = advanced_image_tools.apply_black_and_white()
 
-            output_image_file_path = os.path.join(self.save_path, f'{base_image_file_name}_blackAndWhiteFilter.png')
+            output_image_file_path = os.path.join(self.save_path, f'{base_image_file_name[:10]}_{unique_id}_{timestamp}.png')
             success = cv2.imwrite(output_image_file_path, bw_image)
 
             if not success:

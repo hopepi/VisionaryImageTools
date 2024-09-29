@@ -1,8 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
 from DirectorySelect import DirectorySelect as ds
-import cv2
-
 from ImageBlackAndWhiteProcessor import ImageBlackAndWhiteProcessor
 from Rotation import Rotation
 from ImageNoiseProcessor import ImageNoiseProcessor
@@ -115,6 +113,7 @@ def add_noise_to_batch():
                 selected_noisy.append(item)
         image_noise_processor = ImageNoiseProcessor(save_path=save_path)
         image_noise_processor.add_random_noisy_label_images(all_image_tagged_map=all_label_dir,noisy_weight=noise_value,noisy_list=selected_noisy)
+        messagebox.showinfo(title="Process Completed", message="Process completed successfully!")
 
 
 
@@ -228,6 +227,7 @@ def add_noise_to_just_image():
 
         image_noise_processor = ImageNoiseProcessor(save_path=save_path)
         image_noise_processor.add_random_noisy_images(all_images=all_images_dir,noisy_weight=noise_value,noisy_list=selected_noisy)
+        messagebox.showinfo(title="Process Completed", message="Process completed successfully!")
 
 
 
@@ -338,6 +338,7 @@ def add_noise_to_one_image():
 
         image_noise_processor = ImageNoiseProcessor(save_path=save_path)
         image_noise_processor.add_noisy_one_image(image_path=images_dir,noisy_list=selected_noisy)
+        messagebox.showinfo(title="Process Completed", message="Process completed successfully!")
 
     def select_image():
         nonlocal images_dir
@@ -424,6 +425,7 @@ def apply_black_and_white_effect_to_batch():
             return
         image_bw_processor = ImageBlackAndWhiteProcessor(save_path=save_path)
         image_bw_processor.add_random_bw_label_images(all_image_tagged_map = all_label_dir, bw_weight = bw_points)
+        messagebox.showinfo(title="Process Completed", message="Process completed successfully!")
 
 
     save_button = tk.Button(window, text="Select Save Path", command=select_save_path)
@@ -491,6 +493,7 @@ def apply_black_and_white_effect_to_just_image():
 
         image_bw_processor = ImageBlackAndWhiteProcessor(save_path=save_path)
         image_bw_processor.add_random_bw_images(all_images_list=all_images_dir, bw_weight=bw_points)
+        messagebox.showinfo(title="Process Completed", message="Process completed successfully!")
 
 
     save_button = tk.Button(window, text="Select Save Path", command=select_save_path)
@@ -520,6 +523,9 @@ def clear_widgets():
         widget.pack_forget()
 
 
+def on_closing():
+    if messagebox.askokcancel("Quit", "Do you want to quit?"):
+        window.destroy()
 
 
 def main_screen():
@@ -555,6 +561,9 @@ def main_screen():
     result_label = tk.Label(window, text="Please select an operation.")
     result_label.pack(pady=10)
 
+    window.protocol("WM_DELETE_WINDOW", on_closing)
+
     window.mainloop()
+
 
 main_screen()

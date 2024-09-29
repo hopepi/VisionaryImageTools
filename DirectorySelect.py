@@ -31,9 +31,6 @@ class DirectorySelect:
                 if img_name in labels:  # Eğer aynı isme sahip bir txt dosyası varsa
                         mappings[img_path] = labels[img_name]
 
-            print("Eşleşmeler:")
-            for img, lbl in mappings.items():
-                print(f"{img} --> {lbl}")
 
             return mappings
 
@@ -79,9 +76,3 @@ class DirectorySelect:
         else:
             print("Herhangi bir değer seçilmedi")
 
-"""
-test = DirectorySelect()
-print(test.select_directory())
-print(test.select_image_list())
-print(test.select_image())
-"""

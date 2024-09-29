@@ -1,5 +1,4 @@
 import cv2
-
 from AdvancedImage import AdvancedImage
 
 class Flip:
