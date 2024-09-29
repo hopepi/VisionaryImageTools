@@ -68,7 +68,6 @@ class ImageNoiseProcessor:
             else:
                 output_txt_file_path = os.path.join(self.save_path, f'{base_txt_file_name}_{noise_method}.txt')
                 LabelProcessor.write_labels_to_file(output_txt_file_path, labels)
-            index += 1
 
 
 

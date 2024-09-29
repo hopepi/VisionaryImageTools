@@ -129,6 +129,8 @@ class AdvancedImage:
     # ksize: Bulanıklık penceresinin boyutu
     def apply_blur(self, ksize=5):
         blurred_image = cv2.GaussianBlur(self.image, (ksize, ksize), 0)
-
         return blurred_image
 
+    def apply_black_and_white(self):
+        bw_image = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+        return bw_image

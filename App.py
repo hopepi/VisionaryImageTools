@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import messagebox
 from DirectorySelect import DirectorySelect as ds
 import cv2
+
+from ImageBlackAndWhiteProcessor import ImageBlackAndWhiteProcessor
 from Rotation import Rotation
 from ImageNoiseProcessor import ImageNoiseProcessor
 
@@ -69,9 +71,6 @@ def return_labeled_data():
     process_button.pack(pady=20)
 
 
-
-
-
 def add_noise_to_batch():
     clear_widgets()
 
@@ -98,7 +97,6 @@ def add_noise_to_batch():
     def click_progress():
         selected_count = 0
         selected_noisy=[]
-        print(noise_value)
         for selected in checkbox_states.values():
             if selected:
                 selected_count += 1
@@ -183,8 +181,6 @@ def add_noise_to_batch():
     process_button.pack(pady=20)
 
 
-
-
 def add_noise_to_just_image():
     clear_widgets()
 
@@ -254,7 +250,7 @@ def add_noise_to_just_image():
             directory_select_label.config(
                 text=f"Selected Label Path: {cleaned_item} --> Images count: {len(all_images_dir)}")
         else:
-            directory_select_label.config(text=f"Not found tagged image")
+            directory_select_label.config(text=f"Not found image")
 
     save_button = tk.Button(window, text="Select Save Path", command=select_save_path)
     save_button.pack(pady=10)
@@ -292,7 +288,6 @@ def add_noise_to_just_image():
 
     process_button = tk.Button(window, text="Add Noise to just image", command=click_process)
     process_button.pack(pady=20)
-
 
 
 def add_noise_to_one_image():
@@ -387,12 +382,142 @@ def add_noise_to_one_image():
     process_button.pack(pady=20)
 
 
+def apply_black_and_white_effect_to_batch():
+    clear_widgets()
+
+    bw_points=0
+    save_path = ""
+    all_label_dir = {}
+
+
+    def update_noise_value(value):
+        nonlocal bw_points
+        bw_points = int(value)
+
+    def select_save_path():
+        nonlocal save_path
+        direct_select = ds()
+        save_path = direct_select.select_save_directory()
+        if save_path:
+            save_label.config(text=f"Save Path: {save_path}")
+
+    def select_tagged_images_directory():
+        nonlocal all_label_dir
+        direct_select = ds()
+        all_label_dir = direct_select.select_directory()
+
+        if all_label_dir:
+            first_item = list(all_label_dir.keys())[0]
+            print(first_item)
+            cleaned_item = first_item.split('\\')[0].strip()
+            directory_select_label.config(
+                text=f"Selected Label Path: {cleaned_item} --> Tagged images count: {len(all_label_dir)}")
+        else:
+            directory_select_label.config(text=f"Not found tagged image")
+
+    def click_progress():
+        if len(all_label_dir) == 0:
+            messagebox.showerror("Error", "Please selected tagged image path")
+            return
+        if save_path == "":
+            messagebox.showerror("Error", "Please selected save path")
+            return
+        image_bw_processor = ImageBlackAndWhiteProcessor(save_path=save_path)
+        image_bw_processor.add_random_bw_label_images(all_image_tagged_map = all_label_dir, bw_weight = bw_points)
+
+
+    save_button = tk.Button(window, text="Select Save Path", command=select_save_path)
+    save_button.pack(pady=10)
+
+    save_label = tk.Label(window, text="")
+    save_label.pack(pady=10)
+
+    directory_select = tk.Button(window, text="Select tagged images directory", command=select_tagged_images_directory)
+    directory_select.pack(pady=10)
+
+    directory_select_label = tk.Label(window, text="")
+    directory_select_label.pack(pady=10)
+
+    label = tk.Label(window, text="--> !Recommendation: between 5% and 15%! <--")
+    label.pack(pady=5)
+    noise_scale = tk.Scale(window, from_=0, to=100, orient='horizontal', label="     Accrual %",
+                           command=update_noise_value)
+    noise_scale.pack(pady=5)
+
+    process_button = tk.Button(window, text="Apply Black And White Effect To Batch", command=click_progress)
+    process_button.pack(pady=20)
+
+
+def apply_black_and_white_effect_to_just_image():
+    clear_widgets()
+
+    bw_points = 0
+    save_path = ""
+    all_images_dir = []
+
+    def update_noise_value(value):
+        nonlocal bw_points
+        bw_points = int(value)
+
+    def select_save_path():
+        nonlocal save_path
+        direct_select = ds()
+        save_path = direct_select.select_save_directory()
+        if save_path:
+            save_label.config(text=f"Save Path: {save_path}")
+
+    def select_images_directory():
+        nonlocal all_images_dir
+        direct_select = ds()
+        all_images_dir = direct_select.select_image_list()
+
+        if all_images_dir:
+            first_item = all_images_dir[0]
+            print(first_item)
+            cleaned_item = first_item.split('\\')[0].strip()
+            directory_select_label.config(
+                text=f"Selected Label Path: {cleaned_item} --> Images count: {len(all_images_dir)}")
+        else:
+            directory_select_label.config(text=f"Not found image")
+
+
+    def click_process():
+        if len(all_images_dir) == 0:
+            messagebox.showerror("Error", "Please selected images path")
+            return
+        if save_path == "":
+            messagebox.showerror("Error", "Please selected save path")
+            return
+
+        image_bw_processor = ImageBlackAndWhiteProcessor(save_path=save_path)
+        image_bw_processor.add_random_bw_images(all_images_list=all_images_dir, bw_weight=bw_points)
+
+
+    save_button = tk.Button(window, text="Select Save Path", command=select_save_path)
+    save_button.pack(pady=10)
+
+    save_label = tk.Label(window, text="")
+    save_label.pack(pady=10)
+
+    directory_select = tk.Button(window, text="Select images directory", command=select_images_directory)
+    directory_select.pack(pady=10)
+
+    directory_select_label = tk.Label(window, text="")
+    directory_select_label.pack(pady=10)
+
+    label = tk.Label(window, text="--> !Recommendation: between 5% and 15%! <--")
+    label.pack(pady=5)
+    noise_scale = tk.Scale(window, from_=0, to=100, orient='horizontal', label="     Accrual %",
+                           command=update_noise_value)
+    noise_scale.pack(pady=5)
+
+    process_button = tk.Button(window, text="Add Black And White Filter To just image", command=click_process)
+    process_button.pack(pady=20)
+
 
 def clear_widgets():
     for widget in window.winfo_children():
         widget.pack_forget()
-
-
 
 
 
@@ -406,13 +531,23 @@ def main_screen():
     menu_bar = tk.Menu(window)
 
     operation_menu = tk.Menu(menu_bar, tearoff=0)
-    menu_bar.add_cascade(label="Operations", menu=operation_menu)
+    menu_bar.add_cascade(label="Add Rotation", menu=operation_menu)
+    operation_menu.add_command(label="Add Rotation Label And Images", command=return_labeled_data)
+
+    operation_menu = tk.Menu(menu_bar, tearoff=0)
+    menu_bar.add_cascade(label="Add Noisy", menu=operation_menu)
 
 
-    operation_menu.add_command(label="Return Labeled Data", command=return_labeled_data)
     operation_menu.add_command(label="Add Tagged Image Noise to Batch", command=add_noise_to_batch)
-    operation_menu.add_command(label="Add Noise to Just Image", command=add_noise_to_just_image)
-    operation_menu.add_command(label="Add Noise to One Image", command=add_noise_to_one_image)
+    operation_menu.add_command(label="Add Noise To Just Image", command=add_noise_to_just_image)
+    operation_menu.add_command(label="Add Noise To One Image", command=add_noise_to_one_image)
+
+    black_and_white_menu = tk.Menu(menu_bar, tearoff=0)
+    menu_bar.add_cascade(label="Add Black And White Effect", menu=black_and_white_menu)
+
+
+    black_and_white_menu.add_command(label="Apply Black And White Effect To Batch", command=apply_black_and_white_effect_to_batch)
+    black_and_white_menu.add_command(label="Apply Black And White Just Image",command=apply_black_and_white_effect_to_just_image)
 
     window.config(menu=menu_bar)
 
